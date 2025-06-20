@@ -1,19 +1,15 @@
-# Use an official Node.js runtime as the base image
+# Use an official Node.js runtime as the base image.
+# Using 'alpine' makes the image smaller, which is good for faster deploys.
+# '20' is the Node.js major version. Adjust if you use a different version (e.g., node:18-alpine).
 FROM node:20-alpine
-
-# Set the working directory in the container
+# All subsequent commands will run from /app.
 WORKDIR /app
-
-# Copy package.json and package-lock.json to the working directory
-
-# Install application dependencies
-RUN npm install
-
-# Copy the rest of your application source code
+# npm install won't need to re-run, making builds faster.
+COPY package.json ./
+COPY package-lock.json ./
+# ensuring consistent builds.
+RUN npm ci
 COPY . .
-
-# Expose the port your Express app listens on
 EXPOSE 3000
 
-# Command to run your application
 CMD ["node", "server.js"]
