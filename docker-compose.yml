@@ -1,0 +1,42 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: your-express-app
+    ports:
+      - "3000:3000" # Host_Port:Container_Port
+    depends_on:
+      - localhost # Ensure the database service starts before the app service
+    environment:
+      # Env Variable
+      DB_HOST: localhost        # This is the service name defined below (allows communication within Docker network)
+      DB_USER: root      # Or your specific MySQL user
+      DB_PASSWORD: iwakpeyek23 # **CHANGE THIS!**
+      DB_NAME: ppob_api       # **CHANGE THIS!**
+      # Add any other environment variables your app needs (e.g., JWT_SECRET)
+      # NODE_ENV: development
+    volumes:
+      - .:/app
+      - /app/node_modules # Prevents host's node_modules from overwriting container's
+
+  # MySQL Database Service
+  db:
+    image: mysql:8.0 # Use MySQL 8.0 or a version compatible with your setup
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: iwakpeyek23 
+      MYSQL_DATABASE: your_database_name   
+      MYSQL_USER: root                     
+      MYSQL_PASSWORD: iwakpeyek23
+    ports:
+      - "3306:3306" # Expose MySQL port to host (optional, but useful for connecting with a GUI client)
+    volumes:
+      # Persist database data on your host machine to prevent data loss on container removal
+      - db_data:/var/lib/mysql
+      # Optional: Mount your schema.sql to initialize the database on first run
+      - ./src/database/schema.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+# Define named volumes
+volumes:
+  db_data: # This will create a Docker volume named 'db_data'
